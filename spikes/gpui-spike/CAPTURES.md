@@ -163,3 +163,5 @@ it's all on GPUI's own async executor, which is the pattern to copy for `yoshi-k
 
 - Scroll feel, 1000-row uniform_list, macOS trackpad: fast momentum scrolling smooth, no stutter or tearing. PASS.
 - IME (CJK) + clipboard round-trip: pending — requires the `input` binary (src/bin/input.rs).
+- Clipboard round-trip (src/bin/input.rs, cmd+C/V/X): PASS both directions.
+- IME / press-and-hold accent picker (hold a → press 2 → á): PASS — marked-text composition commits correctly; popup anchoring slightly off-caret (example's bounds_for_range is approximate; cosmetic, spike-acceptable). Note: first run crashed on a selection-offset transcription bug in our adaptation (fixed, `new_range.end + range.start`); not a gpui defect.
