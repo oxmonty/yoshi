@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+echo "==> rustup components"
+rustup component add rustfmt clippy
+
+echo "==> cargo-deny"
+if ! command -v cargo-deny >/dev/null 2>&1; then
+    cargo install --locked cargo-deny
+else
+    echo "already installed"
+fi
+
+echo "==> cargo-nextest"
+if ! command -v cargo-nextest >/dev/null 2>&1; then
+    cargo install --locked cargo-nextest
+else
+    echo "already installed"
+fi
+
+echo "==> python3 + venv (for kernel integration tests)"
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "error: python3 not found, install it first" >&2
+    exit 1
+fi
+if [ ! -d .venv ]; then
+    python3 -m venv .venv
+fi
+.venv/bin/pip install --quiet --upgrade pip ipykernel
+
+echo
+echo "==> bootstrap summary"
+echo "rustfmt:      $(rustup component list --installed | grep -c rustfmt) installed"
+echo "clippy:       $(rustup component list --installed | grep -c clippy) installed"
+echo "cargo-deny:   $(command -v cargo-deny || echo 'not found')"
+echo "cargo-nextest:$(command -v cargo-nextest || echo 'not found')"
+echo "python venv:  .venv ($(.venv/bin/python3 --version))"
