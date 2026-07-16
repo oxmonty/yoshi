@@ -17,15 +17,16 @@ Usable as:
 ## Roadmap
 
 - [ ] **E1: Framework bake-off + hello world** — the repo exists on GitHub, the framework winner is recorded in the decision log, and `cargo run` opens a native window that executes `print("hello, yoshi")` against a real local ipykernel — after an explicit kernel-ready handshake — and displays the output, on both dev platforms, before any packaging exists. Honest sizing: ~2–3 weeks of evenings. → [Kernel session loop](PRD.md#kernel-session-loop), [Project structure](PRD.md#project-structure)
-    - [ ] Repo scaffolded and pushed: workspace layout, `script/bootstrap`, `script/run`, README with the pitch line
-    - [ ] Spike A (timebox: 2 evenings): `warpui` + `warpui_core` as git deps at a pinned commit — build a window with a scrollable text list; capture `cargo tree` + `cargo deny`, text-input primitives, IME entry of a CJK string, clipboard round-trip, whether a native view/window handle is exposed (gates E9's overlay path), accessibility support (assume none); glance at the entanglement of Warp's AGPL `warp_editor` and `ipynb_parser` crates — reuse is a bonus discovered here, never a plan
-    - [ ] Spike B (timebox: 2 evenings): same window and same captures on GPUI — plus skim how Zed's `crates/repl` structures kernel-channel tasks
-    - [ ] Decide and record: criteria are (1) builds standalone with a clean license tree, (2) a usable text-input primitive path, (3) docs/examples good enough to be productive solo, (4) API stability outlook — tie-breaker to GPUI (proven as an external dependency, Apache-2.0, Zed's repl is a working reference for the riskiest integration, and the single-runtime path is validated on it); warpui must win on measured spike evidence
-    - [ ] Hello world on the winner (timebox: 3 evenings): window renders a hardcoded cell, Run spawns ipykernel via `jupyter-zmq-client`, waits for ready (kernel_info reply + first iopub status), sends one ExecuteRequest, renders the stream output — proving the framework event loop and the kernel I/O runtime coexist (the project's single riskiest integration)
+    - [x] Repo scaffolded and pushed: workspace layout, `script/bootstrap`, `script/run`, README with the pitch line
+    - [x] Spike A (timebox: 2 evenings): `warpui` + `warpui_core` as git deps at a pinned commit — build a window with a scrollable text list; capture `cargo tree` + `cargo deny`, text-input primitives, IME entry of a CJK string, clipboard round-trip, whether a native view/window handle is exposed (gates E9's overlay path), accessibility support (assume none); glance at the entanglement of Warp's AGPL `warp_editor` and `ipynb_parser` crates — reuse is a bonus discovered here, never a plan
+    - [x] Spike B (timebox: 2 evenings): same window and same captures on GPUI — plus skim how Zed's `crates/repl` structures kernel-channel tasks
+    - [x] Decide and record: criteria are (1) builds standalone with a clean license tree, (2) a usable text-input primitive path, (3) docs/examples good enough to be productive solo, (4) API stability outlook — tie-breaker to GPUI (proven as an external dependency, Apache-2.0, Zed's repl is a working reference for the riskiest integration, and the single-runtime path is validated on it); warpui must win on measured spike evidence
+    - [x] Hello world on the winner (timebox: 3 evenings): window renders a hardcoded cell, Run spawns ipykernel via `jupyter-zmq-client`, waits for ready (kernel_info reply + first iopub status), sends one ExecuteRequest, renders the stream output — proving the framework event loop and the kernel I/O runtime coexist (the project's single riskiest integration)
 
 - [ ] **E2: CI + unsigned artifacts (walking skeleton)** — the E1 hello world, unchanged, downloads from GitHub Releases and runs on a clean machine (zipped `.app` on macOS via right-click-Open, AppImage on Linux), with CI green on both platforms. Signed installers and Homebrew arrive with v0.1 (E8). → [Distribution](PRD.md#distribution), [CI/CD](PRD.md#cicd)
     - [ ] GitHub Actions matrix (macos-14, ubuntu-24.04): fmt, clippy, `cargo deny`, nextest
     - [ ] Tag → build → GitHub Release: zipped `.app` + AppImage + checksums, unsigned (Gatekeeper bypass documented in the README)
+    - [ ] Minimal app identity: macOS bundle with Info.plist (bundle id `com.oxmonty.yoshi`, version from Cargo) + placeholder `.icns`; AppImage carries a `.desktop` file + icon
     - [ ] `yoshi --version` and `yoshi kernels list` work from a downloaded artifact (kernelspec-discovery smoke test)
     - [ ] Every later epic stays green on CI from here; tag per epic
 
@@ -58,7 +59,7 @@ Usable as:
     - [ ] Markdown cells toggle rendered↔source: rendered when unselected, raw source in edit mode, re-render on run
     - [ ] Run All and Restart-and-Run-All (cells aborted after an error show as aborted, not running)
     - [ ] Kernel status indicator + kernel picker — the picker is the common path, not a fallback: notebook metadata usually names bare `python3`, which mispicks environments
-    - [ ] File open/save/save-as with native dialogs; New Notebook (`⌘N`) creates an untitled v4.5 notebook
+    - [ ] File open/save/save-as with native dialogs; New Notebook (`⌘N`); native macOS menu bar (`cx.set_menus`) with File/Edit/Window routing the same actions as the shortcuts
 
 - [ ] **E7: Output rendering, tier 1** — matplotlib inline plots, pandas text reprs, tracebacks, and streaming stdout all render correctly in the golden-notebook structure tests; the five MVP renderers ship behind a MIME-ranking dispatcher. → [Output rendering](PRD.md#output-rendering)
     - [ ] MIME bundle ranking (richest-renderable-first, Zed's model), with `text/html` explicitly ranked below `text/plain` in MVP so the sibling fallback is unambiguous
@@ -73,6 +74,7 @@ Usable as:
     - [ ] Settings file (`~/.config/yoshi/settings.toml`): theme, font, default kernel
     - [ ] macOS signing: Developer ID + notarytool + stapling + hardened-runtime entitlements; `.dmg` artifact
     - [ ] Homebrew cask in `oxmonty/homebrew-tap` (macOS-only; CLI exposed via the cask `binary` stanza) + release-please tag pipeline
+    - [ ] Branding pass: real app icon (`.icns` + Linux icon), About panel, `.dmg` background — logo asset needed before this story
 
 ---
 *MVP line — E1–E8 ship as v0.1: a native notebook editor that opens, edits, executes, and saves real-world `.ipynb` files against local Python kernels, with tier-1 outputs, undo/redo, and Jupyter keyboard parity, installable from Homebrew (macOS) and GitHub Releases.*

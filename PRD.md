@@ -201,6 +201,7 @@ merge to main ──▶ release-please PR ──▶ tag vX.Y.Z
 - **Startup discipline** (protects the <500ms claim): kernelspecs are read directly from disk, never by shelling out to `jupyter`; kernel launch is async and never blocks first paint; startup avoids system-font enumeration (bundle the font, load lazily); wgpu pipeline and font-atlas warmup happen off the critical path. First-ever launch (cold shader/fontconfig caches) is slower than the benchmarked warm-cache number — the benchmark states its cache assumptions.
 - **Telemetry stance**: none in MVP; tier-2 adds *opt-in, local-only* logging of unrenderable MIME types to guide renderer priorities. Stated in README — it's a differentiator against Warp's own telemetry reputation.
 - **Exit contract**: CLI exits 0/1/2 (ok / file error / kernel error); the app never blocks quit on a busy kernel — it interrupts, waits 2s, kills.
+- **App identity & menus**: yoshi ships as a real macOS app bundle — Info.plist with bundle id `com.oxmonty.yoshi`, version synced from Cargo, `.icns` icon (placeholder until the E8 branding pass) — and a native menu bar via GPUI's `cx.set_menus` (Zed's mechanism): File/Edit/Window menus route the same actions as the keyboard shortcuts, because macOS users discover features through the menu bar. Linux gets a `.desktop` entry + icon inside the AppImage. The logo asset itself is an open need before E8's branding story.
 - **Font/rendering**: bundle one good monospace (JetBrains Mono or Geist Mono) so golden output is deterministic across machines.
 - **Upstream hygiene**: framework bumps happen on a schedule (monthly), each in an isolated PR with the full validation suite — never alongside feature work.
 
@@ -214,7 +215,7 @@ merge to main ──▶ release-please PR ──▶ tag vX.Y.Z
 - **GPUI 0.2.2** (Apache-2.0, crates.io; its API tracks Zed HEAD closely, and Zed's repl proves the kernel integration) — chosen in the E1 bake-off, 2026-07-16 (see Open questions for the evidence).
 - **jupyter-zmq-client** v1 (kernel transport; the renamed runtimelib), **jupyter-protocol** v2 (message types, transport-agnostic), **jupyter-websocket-client** v2 (E10), **nbformat** v3 (parse; yoshi owns canonical serialization) — all BSD-3-Clause, runtimed org.
 - **helix-core** (MPL-2.0) + **cosmic-text** (MIT/Apache) — cell-editor baseline; **Warp `warp_editor` / `ipynb_parser`** (AGPL) — extraction candidates evaluated as spike-time bonuses only.
-- **wry** (per-output webviews, tier 2; `wgpu-scry` → static-image → CEF-OSR escalation ladder), **tokio or async-dispatcher** (single-runtime preference, follows the framework), **zeromq** pure-Rust (transitive), **syntect or tree-sitter** (highlighting), **resvg** (tier-2 SVG), **clap** (CLI).
+- **wry** (per-output webviews, tier 2; `wgpu-scry` → static-image → CEF-OSR escalation ladder), **async-dispatcher** (kernel I/O on GPUI's executor, no tokio in-process — validated in E1), **zeromq** pure-Rust (transitive), **syntect or tree-sitter** (highlighting), **resvg** (tier-2 SVG), **clap** (CLI).
 
 ## Reference codebases
 
