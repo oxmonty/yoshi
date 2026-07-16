@@ -1,0 +1,7 @@
+# warpui's build.rs (Metal shader compilation) requires this to be set; upstream
+# warp/.cargo/config.toml sets the same value, which doesn't apply outside that repo.
+[env]
+MACOSX_DEPLOYMENT_TARGET = "10.14"
+
+[net]
+git-fetch-with-cli = true

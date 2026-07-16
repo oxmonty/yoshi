@@ -1,0 +1,26 @@
+[workspace]
+
+[package]
+name = "warpui-spike"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "MIT"
+
+[dependencies]
+anyhow = "1.0"
+warpui = { git = "https://github.com/warpdotdev/warp", rev = "9fd88b6fe917" }
+warpui_core = { git = "https://github.com/warpdotdev/warp", rev = "9fd88b6fe917" }
+
+# Without this, the build fails: warpui pins core-graphics 0.25 directly, while
+# cocoa 0.26 and core-text 21.0 pull in core-graphics 0.24, and a single font-kit
+# function mixes CGFont values from both, which don't unify. Upstream warp's own
+# workspace Cargo.toml carries this same [patch.crates-io] table to resolve it;
+# it doesn't propagate to an external git-dependency consumer, so we replicate it.
+[patch.crates-io]
+core-foundation = { git = "https://github.com/servo/core-foundation-rs", rev = "6f844cf1a1a18e25b70fcdf1bcdc458555bd2eff" }
+core-foundation-sys = { git = "https://github.com/servo/core-foundation-rs", rev = "6f844cf1a1a18e25b70fcdf1bcdc458555bd2eff" }
+core-graphics = { git = "https://github.com/servo/core-foundation-rs", rev = "6f844cf1a1a18e25b70fcdf1bcdc458555bd2eff" }
+core-text = { git = "https://github.com/servo/core-foundation-rs", rev = "6f844cf1a1a18e25b70fcdf1bcdc458555bd2eff" }
+objc = { git = "https://github.com/warpdotdev/rust-objc.git", rev = "5b656827fa9f863ef0eb22e444a3fedac009e78a" }
+pathfinder_simd = { git = "https://github.com/warpdotdev/pathfinder.git", rev = "34128a129ca6aee168fbc5060a4f21b4f7e486a9" }

@@ -2,7 +2,7 @@
 
 > Repo: https://github.com/oxmonty/yoshi
 
-Yoshi is a native, GPU-rendered Jupyter notebook desktop app for macOS and Linux, built in Rust on a wgpu-class UI framework (GPUI, or Warp's MIT-licensed `warpui` — the E1 bake-off decides, tie-breaker to GPUI). It opens, edits, and executes `.ipynb` files against local Jupyter kernels with sub-second cold start to an interactive window and 60fps scrolling through large native outputs — where JupyterLab Desktop is Electron wrapping a web app and nteract Desktop is Tauri wrapping React, yoshi's shell, editor, and common outputs are fully native, with sandboxed webviews appearing only *inside* individual rich outputs: the browser engine renders web content, never the app.
+Yoshi is a native, GPU-rendered Jupyter notebook desktop app for macOS and Linux, built in Rust on GPUI — the wgpu-class UI framework behind Zed. It opens, edits, and executes `.ipynb` files against local Jupyter kernels with sub-second cold start to an interactive window and 60fps scrolling through large native outputs — where JupyterLab Desktop is Electron wrapping a web app and nteract Desktop is Tauri wrapping React, yoshi's shell, editor, and common outputs are fully native, with sandboxed webviews appearing only *inside* individual rich outputs: the browser engine renders web content, never the app.
 
 ```
 yoshi analysis.ipynb   # < 500ms to an interactive window; pick a kernel once, ⇧⏎ runs
@@ -46,7 +46,7 @@ Usable as:
     - [ ] Golden corpus curated for producer and encoding diversity: classic Notebook, JupyterLab, VS Code, and papermill outputs; v4.0 and v4.5; non-ASCII/emoji content; widget and unknown metadata
 
 - [ ] **E5: Cell editor** — the single largest net-new UI component, built as its own epic on the E1 decision: type, select, and syntax-highlight code in a cell, with working IME and clipboard. Approach gated on E1's primitive inventory; `warp_editor` reuse only if Spike A showed extraction cheap. → [Cell editor](PRD.md#cell-editor)
-    - [ ] Text buffer + selection model: helix-core ropes (or the framework primitive, if E1 proved it usable)
+    - [ ] Text buffer + selection model: helix-core ropes on GPUI's input primitives (E1 confirmed GPUI ships primitives but no editor widget)
     - [ ] Rendering: cosmic-text shaping/layout wired into the framework's draw path; cursor + selection painting; intra-cell scroll
     - [ ] Syntax highlighting (tree-sitter or syntect) for Python and markdown source
     - [ ] IME + clipboard correctness: CJK entry, dead keys, text copy/paste in both directions
