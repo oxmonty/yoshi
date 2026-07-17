@@ -48,11 +48,11 @@ Implementation traps:
 - **Zombie kernels.** Spawn with `kill_on_drop(true)` and reap on window close, crash, and restart; clean up stale connection files.
 - **Heartbeat vs. busy.** A kernel executing a long computation is heartbeat-alive but shell-unresponsive; the status UI must distinguish busy from dead or users will force-restart mid-computation.
 - **stdin: fail loud, not silently wrong.** MVP sets `allow_stdin: false` on every execute — `input()` then raises `StdinNotImplementedError`, which renders as a normal traceback. Auto-replying an empty string would let programs continue on bad input; a native prompt is a tier-2 nicety.
-- **Connection-file security.** The file contains the HMAC key: write it 0600 in the Jupyter runtime dir. The transport signs outgoing and verifies incoming messages (`jupyter-zmq-client` handles this; it matters most for E10 remote).
+- **Connection-file security.** The file contains the HMAC key: write it 0600 in the Jupyter runtime dir. The transport signs outgoing and verifies incoming messages (`jupyter-zmq-client` handles this; it matters most for E12 remote).
 
 ### Future: remote kernels
 
-The session actor's public API (execute, interrupt, status watch, output stream) is transport-agnostic from day one — `jupyter-protocol` types are shared between the ZeroMQ and WebSocket clients, so E10 swaps the transport behind the same trait rather than reworking the UI. The discipline now: no ZeroMQ types leak above `yoshi-kernels`.
+The session actor's public API (execute, interrupt, status watch, output stream) is transport-agnostic from day one — `jupyter-protocol` types are shared between the ZeroMQ and WebSocket clients, so E12 swaps the transport behind the same trait rather than reworking the UI. The discipline now: no ZeroMQ types leak above `yoshi-kernels`.
 
 ---
 
@@ -60,7 +60,7 @@ The session actor's public API (execute, interrupt, status watch, output stream)
 
 | Surface | Primary user | What's on it |
 |---|---|---|
-| Desktop app | Data scientist / notebook author | Notebook view (cell list, editor, outputs, run controls); kernel status bar (state, interrupt, restart, picker); file open/save dialogs; settings via `settings.toml` |
+| Desktop app | Data scientist / notebook author | Notebook view (cell list, editor, outputs, run controls); kernel status bar (state, interrupt, restart, picker); file open/save dialogs; settings via `settings.json` + `keymap.json` |
 | CLI | Same human + CI smoke tests | `yoshi <file>` (launch app on file), `yoshi kernels list` (print discovered kernelspecs), `yoshi --version` |
 
 Views (desktop app, MVP):
@@ -113,6 +113,7 @@ MIME ranking dispatcher (Zed's model): given a bundle, pick the richest renderab
 | `execute_result` `text/plain` | ANSI text (covers pandas/polars reprs — pandas emits a `text/plain` sibling alongside `text/html`, so plain `df` display renders a readable table in MVP) |
 | `text/html` | Sibling fallback via ranking; placeholder when HTML-only (`Styler`, folium, `IPython.display.HTML`) — tier 2 renders these in a sandboxed per-output webview |
 | `application/vnd.plotly.*` | Placeholder in MVP; tier 2 webview with locally bundled plotly.js |
+| `video/mp4` | Placeholder in MVP; tier 2 sandboxed webview `<video>` (system codecs) |
 | ipywidgets comms | Placeholder with type name; Future (comm bridge over the sandboxed webview channel) |
 
 **Hybrid rendering — native-first, webview-per-output.** Shell, cells, editor, and tier-1 outputs are GPU-native; `text/html`, plotly, and (future) ipywidgets render in embedded per-output webviews. Constraints that make this work instead of quietly becoming Electron: (1) **virtualized** — webviews exist only for rich outputs currently on screen, recycled from a small pool on scroll; (2) **sandboxed** — notebook outputs are untrusted code, so no filesystem or network bridge, plotly.js bundled locally, comm access only through an explicit channel (nteract's iframe-isolation model is the reference); (3) **contained** — a webview never hosts app chrome, only output content.
@@ -133,10 +134,21 @@ The round-trip guarantee is **idempotent canonical round-trip**: yoshi normalize
 
 Autosave to a sidecar recovery file every 30s when dirty; never autosave over the user's file.
 
+### Workspace shell
+
+Post-MVP (E10): the single-notebook window grows into a workspace — a **pane grid** (split, resize, close, and Warp-style drag-a-header-to-swap; Zed's pane system is the architecture reference, GPL, read-only) and a **project tree** sidebar built on the `ignore` crate's gitignore-aware walker with `notify` file watching, rendered on the same virtualized list machinery as cells. Each pane hosts an independent notebook view with its own kernel session. Tree selections preview through the existing output pipeline: images via the native renderers, `video/mp4` via the sandboxed webview (system codecs — no VLC/ffmpeg dependency, which would add a ~100MB runtime for what `<video>` already does). Workspace layout persists across restarts.
+
+Boundary: the workspace exists to open, arrange, and run notebooks — it is not a step toward a general editor/IDE. The tree opens `.ipynb` into panes and previews data files; it does not grow code-editing of arbitrary files.
+
+### Terminal
+
+Post-MVP (E11): a GPU-rendered terminal pane in the grid, sitting beside a notebook — the agent workflow (Claude Code operating on the notebook you're viewing) is the motivating use, and it pairs with the future MCP server. Engine: **`alacritty_terminal`** (Apache-2.0) for PTY and grid state, rendered as a native GPUI view; Zed's `crates/terminal` is the architecture reference (GPL, read-only). Warp is the deliberate UX reference — its drag-swap grid affordances and block-style polish are catalogued and ported by hand; warpui's MIT components are fair styling references, but no Warp code is extracted (E1's spike priced that path out: AGPL sibling webs, warpui coupling).
+
 ### Scope
 
-**In scope:** local Python kernels (ipykernel), single notebook window, tier-1 outputs, macOS + Linux, Jupyter keyboard parity, undo/redo.
-**Future work (considered, not scheduled):** ipywidgets (needs comm protocol + a widget component library — the single largest deferred cost); remote kernels (E10, cheap due to transport abstraction); find/replace; math in markdown; Windows (signing + CI cost defers it); multi-tab workspace.
+**In scope (v0.1):** local Python kernels (ipykernel), single notebook window, tier-1 outputs, macOS + Linux, Jupyter keyboard parity, undo/redo.
+**Scheduled post-MVP:** tier-2 webview outputs (E9), workspace shell — pane grid + project tree (E10), terminal (E11), remote kernels (E12, cheap due to transport abstraction).
+**Future work (considered, not scheduled):** ipywidgets (needs comm protocol + a widget component library — the single largest deferred cost); find/replace; math in markdown; Windows (signing + CI cost defers it); a GUI settings page.
 **Out of scope:** being a general editor/IDE (Zed exists); headless execution (papermill exists); JupyterLab extension compatibility (structurally impossible without the web runtime — this is the price of native, stated openly).
 
 ---
@@ -202,6 +214,7 @@ merge to main ──▶ release-please PR ──▶ tag vX.Y.Z
 - **Telemetry stance**: none in MVP; tier-2 adds *opt-in, local-only* logging of unrenderable MIME types to guide renderer priorities. Stated in README — it's a differentiator against Warp's own telemetry reputation.
 - **Exit contract**: CLI exits 0/1/2 (ok / file error / kernel error); the app never blocks quit on a busy kernel — it interrupts, waits 2s, kills.
 - **App identity & menus**: yoshi ships as a real macOS app bundle — Info.plist with bundle id `com.oxmonty.yoshi`, version synced from Cargo, `.icns` icon (placeholder until the E8 branding pass) — and a native menu bar via GPUI's `cx.set_menus` (Zed's mechanism): File/Edit/Window menus route the same actions as the keyboard shortcuts, because macOS users discover features through the menu bar. Linux gets a `.desktop` entry + icon inside the AppImage. The logo asset itself is an open need before E8's branding story.
+- **Settings & themes**: plain JSON files, Zed's pattern — `~/.config/yoshi/settings.json` (editor settings, font, default kernel, active theme) and `keymap.json` (keybinding overrides), defaults written on first run, opened via a menu command for hand-editing; no settings GUI until post-MVP. Themes ship as three built-ins persisted in settings: **Gruvbox Dark Soft** (default), Gruvbox Light, One Dark; the terminal (E11) and ANSI renderer draw from the active theme's palette.
 - **Font/rendering**: bundle one good monospace (JetBrains Mono or Geist Mono) so golden output is deterministic across machines.
 - **Upstream hygiene**: framework bumps happen on a schedule (monthly), each in an isolated PR with the full validation suite — never alongside feature work.
 
@@ -213,16 +226,17 @@ merge to main ──▶ release-please PR ──▶ tag vX.Y.Z
 
 - **Rust** — the entire viable stack (frameworks, jupyter crates) is Rust; matches the performance claim.
 - **GPUI 0.2.2** (Apache-2.0, crates.io; its API tracks Zed HEAD closely, and Zed's repl proves the kernel integration) — chosen in the E1 bake-off, 2026-07-16 (see Open questions for the evidence).
-- **jupyter-zmq-client** v1 (kernel transport; the renamed runtimelib), **jupyter-protocol** v2 (message types, transport-agnostic), **jupyter-websocket-client** v2 (E10), **nbformat** v3 (parse; yoshi owns canonical serialization) — all BSD-3-Clause, runtimed org.
+- **jupyter-zmq-client** v1 (kernel transport; the renamed runtimelib), **jupyter-protocol** v2 (message types, transport-agnostic), **jupyter-websocket-client** v2 (E12), **nbformat** v3 (parse; yoshi owns canonical serialization) — all BSD-3-Clause, runtimed org.
 - **helix-core** (MPL-2.0) + **cosmic-text** (MIT/Apache) — cell-editor baseline; **Warp `warp_editor` / `ipynb_parser`** (AGPL) — extraction candidates evaluated as spike-time bonuses only.
 - **wry** (per-output webviews, tier 2; `wgpu-scry` → static-image → CEF-OSR escalation ladder), **async-dispatcher** (kernel I/O on GPUI's executor, no tokio in-process — validated in E1), **zeromq** pure-Rust (transitive), **syntect or tree-sitter** (highlighting), **resvg** (tier-2 SVG), **clap** (CLI).
+- Post-MVP: **ignore** + **notify** (E10 project tree), **alacritty_terminal** (Apache-2.0, E11 terminal engine).
 
 ## Reference codebases
 
 | Project | Lesson |
 |---|---|
-| `zed-industries/zed` → `crates/repl` | The blueprint: MIME ranking, per-type output views, kernel-channel task architecture, `RunningKernel` trait. Consult before writing any of E1/E3/E7. |
-| `warpdotdev/warp` → `crates/ipynb_parser`, block crates | The AGPL `ipynb_parser` is still an E4 reuse candidate (framework-independent); the block-UI crates are prior art for cell/block affordances. The warpui framework and `warp_editor` were priced out in the E1 spike (`spikes/warpui-spike/CAPTURES.md`). |
+| `zed-industries/zed` → `crates/repl`, `crates/terminal`, pane system | The blueprint: MIME ranking, per-type output views, kernel-channel task architecture, `RunningKernel` trait (E1/E3/E7); terminal-on-GPUI and pane/dock architecture (E10/E11). GPL — architecture reference only. |
+| `warpdotdev/warp` → `crates/ipynb_parser`, block crates, terminal UX | The AGPL `ipynb_parser` is still an E4 reuse candidate (framework-independent); the block-UI crates and the drag-swap grid are the deliberate UX references for E10/E11 (warpui's MIT components are fair styling references, ported by hand). The warpui framework and `warp_editor` were priced out in the E1 spike (`spikes/warpui-spike/CAPTURES.md`). |
 | `nteract/desktop` | The maintained competitor: daemon design, MCP tool surface, iframe isolation for untrusted outputs, Automerge sync. Consult for tier-2/Future scoping. |
 | `runtimed/runtimed` (+ `sidecar` example) | Canonical `jupyter-zmq-client` usage patterns; kernel-compat quirks live in its issue tracker. |
 | `jupyterlab/jupyterlab-desktop` | Gap analysis + what users expect from menus/session management; also what *not* to rebuild. |

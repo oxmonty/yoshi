@@ -71,7 +71,8 @@ Usable as:
 - [ ] **E8: v0.1 hardening + distribution** — v0.1.0 is cut, signed and notarized, installable via `brew install oxmonty/tap/yoshi` on macOS and AppImage on Linux, with benchmarks published in the README. → [Validation strategy](PRD.md#validation-strategy), [Distribution](PRD.md#distribution)
     - [ ] Bench harness committed: cold start = process launch → UI interactive (warm caches); kernel-ready reported separately (bounded by CPython startup); scroll FPS on a tier-1 capped-output notebook; measured against nteract Desktop and JupyterLab Desktop
     - [ ] Crash-safe autosave / sidecar recovery file
-    - [ ] Settings file (`~/.config/yoshi/settings.toml`): theme, font, default kernel
+    - [ ] Settings: `~/.config/yoshi/settings.json` + `keymap.json` — defaults written on first run, a menu command opens them for manual editing (editor settings, keybinding overrides); no settings GUI in v0.1
+    - [ ] Themes, persisted in settings.json: Gruvbox Dark Soft (default), Gruvbox Light, One Dark
     - [ ] macOS signing: Developer ID + notarytool + stapling + hardened-runtime entitlements; `.dmg` artifact
     - [ ] Homebrew cask in `oxmonty/homebrew-tap` (macOS-only; CLI exposed via the cask `binary` stanza) + release-please tag pipeline
     - [ ] Branding pass: real app icon (`.icns` + Linux icon), About panel, `.dmg` background — logo asset needed before this story
@@ -84,9 +85,22 @@ Usable as:
     - [ ] Escalation ladder recorded: wry overlay → `wgpu-scry` (system webview composited into a wgpu texture) → static-image fallback (plotly static export + "open in browser") → CEF offscreen rendering as last resort (input plumbing, process supervision, and per-helper notarization — not just bundle size)
     - [ ] Webview pool: create-on-visible, recycle-on-scroll, hard cap on live instances
     - [ ] Sandbox policy: no fs/network bridge, plotly.js bundled locally, CSP locked down (nteract's iframe-isolation model is the reference)
-    - [ ] Native table view for `application/vnd.dataresource+json`; SVG via resvg (both stay native)
+    - [ ] Native table view for `application/vnd.dataresource+json`; SVG via resvg (both stay native); `video/mp4` outputs play in the sandboxed webview (system codecs, no media dependencies)
     - [ ] Instrument: opt-in, local-only logging of unrenderable MIME types to prioritize tier 3
 
-- [ ] **E10: Remote kernels** — connect to a running Jupyter server over WebSocket (`jupyter-websocket-client`); opens the loop with users on remote/SSH/cloud workflows. Needs slicing into stories before pickup. → [Future: remote kernels](PRD.md#future-remote-kernels)
+- [ ] **E10: Workspace shell** — a user opens a folder, browses a project tree, and arranges notebooks side by side in draggable grid panes; opens the feedback loop with users who live in multi-notebook projects. → [Workspace shell](PRD.md#workspace-shell)
+    - [ ] Pane grid: horizontal/vertical split, resize, close; drag a pane header to swap positions (Warp's drag-to-swap behavior is the UX reference; Zed's pane system the architecture reference, GPL, read-only)
+    - [ ] Project tree sidebar: `ignore`-crate walker + `notify` file watching, rendered on the same virtualized list machinery as cells; toggleable
+    - [ ] Open notebooks from the tree into panes — each pane hosts an independent notebook view with its own kernel session
+    - [ ] Tree preview for images (native renderers) and `video/mp4` (sandboxed webview), reusing the output pipeline
+    - [ ] Workspace state (open panes, layout, tree visibility) persisted and restored across restarts
 
-**Future (considered, unscheduled)**: ipywidgets via a comm bridge over the sandboxed webview channel — substantially cheaper under the hybrid model than a native reimplementation ([here](PRD.md#output-rendering)); MCP server for agent-driven notebook editing, following nteract's `runt mcp` ([here](PRD.md#competitive-landscape)); in-notebook find/replace (`⌘F`); Windows support ([here](PRD.md#distribution)); multi-notebook workspace/tabs.
+- [ ] **E11: Terminal** — a GPU-rendered terminal pane runs a real shell in the grid next to a notebook (the agent workflow: Claude Code editing the notebook you're viewing); drag-swappable like any pane. → [Terminal](PRD.md#terminal)
+    - [ ] Terminal engine: `alacritty_terminal` (Apache-2.0) for PTY + grid state, rendered as a native GPUI view (Zed's `crates/terminal` is the architecture reference, GPL, read-only)
+    - [ ] Terminal pane type in the E10 grid: shell spawned in the workspace directory, drag-swap with notebook panes
+    - [ ] Keyboard/IME passthrough, scrollback, selection + copy/paste, ANSI colors from the active theme
+    - [ ] Warp UX pass: catalogue the interaction details worth porting by hand (drag-swap affordances, block-style polish — warpui's MIT components are fair styling references; no code extraction)
+
+- [ ] **E12: Remote kernels** — connect to a running Jupyter server over WebSocket (`jupyter-websocket-client`); opens the loop with users on remote/SSH/cloud workflows. Needs slicing into stories before pickup. → [Future: remote kernels](PRD.md#future-remote-kernels)
+
+**Future (considered, unscheduled)**: ipywidgets via a comm bridge over the sandboxed webview channel — substantially cheaper under the hybrid model than a native reimplementation ([here](PRD.md#output-rendering)); MCP server for agent-driven notebook editing, following nteract's `runt mcp` ([here](PRD.md#competitive-landscape)); in-notebook find/replace (`⌘F`); Windows support ([here](PRD.md#distribution)); a GUI settings page (settings stay editable JSON files until then).
