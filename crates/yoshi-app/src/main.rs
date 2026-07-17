@@ -80,34 +80,52 @@ impl async_dispatcher::Dispatcher for GpuiDispatcher {
 }
 
 fn run_gui() {
-    Application::new().run(|cx: &mut App| {
+    let app = Application::new();
+    // macOS: clicking the Dock icon after the window was closed recreates it
+    app.on_reopen(|cx| {
+        if cx.windows().is_empty() {
+            open_hello_window(cx);
+        }
+    });
+    app.run(|cx: &mut App| {
         // kernel I/O runs on gpui's executor: single runtime, no tokio (PRD, runtime model)
         async_dispatcher::set_dispatcher(GpuiDispatcher {
             dispatcher: cx.background_executor().dispatcher.clone(),
         });
         text_input::bind_keys(cx);
         cx.bind_keys([KeyBinding::new("shift-enter", RunCell, None)]);
+        #[cfg(not(target_os = "macos"))]
+        cx.on_window_closed(|cx| {
+            if cx.windows().is_empty() {
+                cx.quit();
+            }
+        })
+        .detach();
 
-        let bounds = Bounds::centered(None, size(px(680.0), px(420.0)), cx);
-        let window = cx
-            .open_window(
-                WindowOptions {
-                    window_bounds: Some(WindowBounds::Windowed(bounds)),
-                    ..Default::default()
-                },
-                |_, cx| {
-                    let input = cx.new(|cx| TextInput::new(cx, HELLO_CODE));
-                    cx.new(|cx| HelloCell::new(input, cx))
-                },
-            )
-            .unwrap();
-        window
-            .update(cx, |view, window, cx| {
-                window.focus(&view.input.focus_handle(cx));
-                cx.activate(true);
-            })
-            .unwrap();
+        open_hello_window(cx);
     });
+}
+
+fn open_hello_window(cx: &mut App) {
+    let bounds = Bounds::centered(None, size(px(680.0), px(420.0)), cx);
+    let window = cx
+        .open_window(
+            WindowOptions {
+                window_bounds: Some(WindowBounds::Windowed(bounds)),
+                ..Default::default()
+            },
+            |_, cx| {
+                let input = cx.new(|cx| TextInput::new(cx, HELLO_CODE));
+                cx.new(|cx| HelloCell::new(input, cx))
+            },
+        )
+        .unwrap();
+    window
+        .update(cx, |view, window, cx| {
+            window.focus(&view.input.focus_handle(cx));
+            cx.activate(true);
+        })
+        .unwrap();
 }
 
 struct HelloCell {
