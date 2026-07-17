@@ -50,6 +50,10 @@ Implementation traps:
 - **stdin: fail loud, not silently wrong.** MVP sets `allow_stdin: false` on every execute — `input()` then raises `StdinNotImplementedError`, which renders as a normal traceback. Auto-replying an empty string would let programs continue on bad input; a native prompt is a tier-2 nicety.
 - **Connection-file security.** The file contains the HMAC key: write it 0600 in the Jupyter runtime dir. The transport signs outgoing and verifies incoming messages (`jupyter-zmq-client` handles this; it matters most for E12 remote).
 
+### Managed default kernel
+
+Zero-setup first run without bundling Python: on first launch yoshi provisions a **managed kernel** via `uv` (the uv binary ships inside the app; the first provision needs network) — `uv python install` + a managed env with ipykernel under yoshi's data dir (`~/.local/share/yoshi/managed-kernel/`), outside the app bundle so app updates never wipe user-installed packages. Users install packages into it with `uv pip install` (a UI affordance for this can come later). The kernel picker lists the managed kernel first, registered kernelspecs below — casual use gets instant execution, project users keep their own environments. Known limit, stated openly: a shared managed env accumulates conflicting packages over time; it is the onboarding path, not a substitute for per-project environments. Auto-detection of unregistered venvs/conda envs in the picker is future work.
+
 ### Future: remote kernels
 
 The session actor's public API (execute, interrupt, status watch, output stream) is transport-agnostic from day one — `jupyter-protocol` types are shared between the ZeroMQ and WebSocket clients, so E12 swaps the transport behind the same trait rather than reworking the UI. The discipline now: no ZeroMQ types leak above `yoshi-kernels`.
@@ -66,7 +70,7 @@ The session actor's public API (execute, interrupt, status watch, output stream)
 Views (desktop app, MVP):
 - **Notebook view** — the cell list; primary actions: run cell, edit cell. Everything else hangs off it.
 - **Kernel status bar** — kernel name + state dot; primary actions: interrupt, restart.
-- **Kernel picker** — list of kernelspecs; primary action: select. This is the common path, not an edge case: notebook metadata usually names bare `python3`, which resolves to whatever interpreter that is (frequently the wrong env), and venvs without `ipykernel install` don't appear as kernelspecs at all.
+- **Kernel picker** — the managed kernel first, registered kernelspecs below; primary action: select (persisted into the notebook's `kernelspec` metadata on save). This is the common path, not an edge case: notebook metadata usually names bare `python3`, which resolves to whatever interpreter that is (frequently the wrong env), and venvs without `ipykernel install` don't appear as kernelspecs at all — the managed kernel is the reliable default.
 
 **Surface-specific (deliberate non-parity):** headless execution (`yoshi run notebook.ipynb`) is *not* in the CLI — `jupyter nbconvert --execute` and papermill own that space, and shipping a worse version dilutes the pitch. The CLI exists to launch the app and smoke-test installs, nothing more.
 
@@ -148,7 +152,7 @@ Post-MVP (E11): a GPU-rendered terminal pane in the grid, sitting beside a noteb
 
 **In scope (v0.1):** local Python kernels (ipykernel), single notebook window, tier-1 outputs, macOS + Linux, Jupyter keyboard parity, undo/redo.
 **Scheduled post-MVP:** tier-2 webview outputs (E9), workspace shell — pane grid + project tree (E10), terminal (E11), remote kernels (E12, cheap due to transport abstraction).
-**Future work (considered, not scheduled):** ipywidgets (needs comm protocol + a widget component library — the single largest deferred cost); find/replace; math in markdown; Windows (signing + CI cost defers it); a GUI settings page.
+**Future work (considered, not scheduled):** ipywidgets (needs comm protocol + a widget component library — the single largest deferred cost); find/replace; math in markdown; Windows (signing + CI cost defers it); a GUI settings page; picker auto-detection of unregistered venvs/conda envs (the managed kernel covers onboarding, so this waits for demand).
 **Out of scope:** being a general editor/IDE (Zed exists); headless execution (papermill exists); JupyterLab extension compatibility (structurally impossible without the web runtime — this is the price of native, stated openly).
 
 ---
@@ -229,6 +233,7 @@ merge to main ──▶ release-please PR ──▶ tag vX.Y.Z
 - **jupyter-zmq-client** v1 (kernel transport; the renamed runtimelib), **jupyter-protocol** v2 (message types, transport-agnostic), **jupyter-websocket-client** v2 (E12), **nbformat** v3 (parse; yoshi owns canonical serialization) — all BSD-3-Clause, runtimed org.
 - **helix-core** (MPL-2.0) + **cosmic-text** (MIT/Apache) — cell-editor baseline; **Warp `warp_editor` / `ipynb_parser`** (AGPL) — extraction candidates evaluated as spike-time bonuses only.
 - **wry** (per-output webviews, tier 2; `wgpu-scry` → static-image → CEF-OSR escalation ladder), **async-dispatcher** (kernel I/O on GPUI's executor, no tokio in-process — validated in E1), **zeromq** pure-Rust (transitive), **syntect or tree-sitter** (highlighting), **resvg** (tier-2 SVG), **clap** (CLI).
+- **uv** (bundled binary, MIT/Apache — provisions the managed default kernel on first launch).
 - Post-MVP: **ignore** + **notify** (E10 project tree), **alacritty_terminal** (Apache-2.0, E11 terminal engine).
 
 ## Reference codebases
@@ -254,4 +259,5 @@ merge to main ──▶ release-please PR ──▶ tag vX.Y.Z
 - **License stance.** (**Resolved 2026-07-16: AGPL-3.0**, chosen before any outside contributions; LICENSE file replaced the repo's initial MIT text the same day. Dependency allowlist MIT/Apache/BSD/MPL/AGPL-3.0 via `cargo deny`. Folded into [License](#license).)
 - **Webview policy.** (**Revised 2026-07-16: hybrid — native-first shell with sandboxed, virtualized per-output webviews**, with the escalation ladder wry-overlay → `wgpu-scry` → static-image fallback → CEF-OSR. Research finding that shaped it: wry child views are X11-only on Linux, so the E9 spike probes Wayland/GTK embedding first, and `wgpu-scry` displaced CEF as the primary escalation. Supersedes the earlier "never" decision same-day. Folded into [Output rendering](#output-rendering).)
 - **Is "native shell, webview only inside outputs" enough differentiation against nteract Desktop?** (Blocks the positioning paragraph staying honest — sharper now that JupyterLab Desktop is unmaintained and nteract shares yoshi's runtimed stack. Resolves: E8 benchmark numbers vs nteract, not just JupyterLab Desktop — the claim to defend is cold start and scroll on notebooks with few or no rich outputs.)
+- **How do users get a working kernel without env pain?** (**Resolved 2026-07-17: managed default kernel via bundled `uv`** — provisioned outside the app bundle on first launch, listed first in the picker, kernelspecs below. Literally bundling CPython was rejected for ~100MB of per-dylib signing and update-wipe risk; kernelspec-only was rejected because first-run would require an existing Jupyter setup. Env auto-detection deferred to Future — the managed kernel covers onboarding. Folded into [Managed default kernel](#managed-default-kernel).)
 - **Keep the name yoshi?** (Blocks nothing until public launch; decide before v0.2 marketing. Collisions on record: crates.io error framework, Wix's JS build toolkit, and the Nintendo trademark. Resolves: a 30-minute trademark-risk read + gut check; rename cost is near-zero pre-launch.)

@@ -10,6 +10,6 @@ Spec: [Validation strategy](../../PRD.md#validation-strategy), [Distribution](..
 - [ ] Crash-safe autosave / sidecar recovery file
 - [ ] Settings: `~/.config/yoshi/settings.json` + `keymap.json` — defaults written on first run, a menu command opens them for manual editing (editor settings, keybinding overrides); no settings GUI in v0.1
 - [ ] Themes, persisted in settings.json: Gruvbox Dark Soft (default), Gruvbox Light, One Dark
-- [ ] macOS signing: Developer ID + notarytool + stapling + hardened-runtime entitlements; `.dmg` artifact
+- [ ] macOS signing: Developer ID + notarytool + stapling + hardened-runtime entitlements (covers the bundled `uv` binary too); `.dmg` artifact
 - [ ] Homebrew cask in `oxmonty/homebrew-tap` (macOS-only; CLI exposed via the cask `binary` stanza) + release-please tag pipeline
 - [ ] Branding pass: real app icon (`.icns` + Linux icon), About panel, `.dmg` background — logo asset needed before this story
