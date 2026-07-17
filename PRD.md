@@ -152,7 +152,7 @@ Post-MVP (E11): a GPU-rendered terminal pane in the grid, sitting beside a noteb
 
 **In scope (v0.1):** local Python kernels (ipykernel), single notebook window, tier-1 outputs, macOS + Linux, Jupyter keyboard parity, undo/redo.
 **Scheduled post-MVP:** tier-2 webview outputs (E9), workspace shell — pane grid + project tree (E10), terminal (E11), remote kernels (E12, cheap due to transport abstraction).
-**Future work (considered, not scheduled):** ipywidgets (needs comm protocol + a widget component library — the single largest deferred cost); find/replace; math in markdown; Windows (signing + CI cost defers it); a GUI settings page; picker auto-detection of unregistered venvs/conda envs (the managed kernel covers onboarding, so this waits for demand).
+**Future work (considered, not scheduled):** ipywidgets (needs comm protocol + a widget component library — the single largest deferred cost); find/replace; math in markdown; Windows (signing + CI cost defers it); a GUI settings page; picker auto-detection of unregistered venvs/conda envs (the managed kernel covers onboarding, so this waits for demand); session restore (reopen the last-open notebook on launch — E10 persists workspace layout, but single-window session restore is unscheduled).
 **Out of scope:** being a general editor/IDE (Zed exists); headless execution (papermill exists); JupyterLab extension compatibility (structurally impossible without the web runtime — this is the price of native, stated openly).
 
 ---

@@ -12,3 +12,4 @@ Spec: [Notebook editing loop](../../PRD.md#notebook-editing-loop), [Surfaces](..
 - [ ] Run All and Restart-and-Run-All (cells aborted after an error show as aborted, not running)
 - [ ] Kernel status indicator + kernel picker — managed kernel first, registered kernelspecs below; selection persisted into the notebook's `kernelspec` metadata on save. The picker is the common path, not a fallback: notebook metadata usually names bare `python3`, which mispicks environments
 - [ ] File open/save/save-as with native dialogs; New Notebook (`⌘N`); native macOS menu bar (`cx.set_menus`) with File/Edit/Window routing the same actions as the shortcuts
+- [ ] Unsaved-changes guard: closing a dirty notebook (window close or quit) prompts Save / Discard / Cancel — dirty state from the E4 model
