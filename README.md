@@ -1,5 +1,5 @@
 <h1>
-  <img alt="yoshi logo" src="./assets/icon/yoshi-256.png" width="70" valign="middle">
+  <img alt="yoshi logo" src="./assets/icon/yoshi-readme.png" width="70" valign="middle">
   &nbsp;yoshi notebooks
 </h1>
 
