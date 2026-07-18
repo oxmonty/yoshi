@@ -3,8 +3,8 @@
   &nbsp;yoshi notebooks
 </h1>
 
-<a href="https://somsubhra.github.io/github-release-stats/?username=oxmonty&repository=yoshi"><img alt="Total downloads across all releases" src="https://img.shields.io/github/downloads/oxmonty/yoshi/total?label=downloads&color=2f6f4f"></a>
-<a href="https://github.com/oxmonty/yoshi/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/oxmonty/yoshi?include_prereleases&label=release&color=1c1c1a"></a>
+<a href="https://somsubhra.github.io/github-release-stats/?username=oxmonty&repository=yoshi"><img alt="Total downloads across all releases" src="https://img.shields.io/github/downloads/oxmonty/yoshi/total?label=downloads&color=c9ccd1"></a>
+<a href="https://github.com/oxmonty/yoshi/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/oxmonty/yoshi?include_prereleases&label=release&color=c9ccd1"></a>
 
 Yoshi is a native, GPU-rendered Jupyter notebook desktop app for macOS and Linux, built in Rust on GPUI — the wgpu-class UI framework behind Zed.
 
