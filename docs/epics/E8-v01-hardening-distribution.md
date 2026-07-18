@@ -6,7 +6,7 @@ Spec: [Validation strategy](../../PRD.md#validation-strategy), [Distribution](..
 
 ## Stories
 
-- [ ] Bench harness committed: cold start = process launch → UI interactive (warm caches); kernel-ready reported separately (bounded by CPython startup); scroll FPS on a tier-1 capped-output notebook; measured against nteract Desktop and JupyterLab Desktop; download-size chart regenerated (`script/bench-download-size`, built in E2) and embedded in the README with the startup numbers
+- [ ] Bench harness committed: cold start = process launch → UI interactive (warm caches); kernel-ready reported separately (bounded by CPython startup); scroll FPS on a tier-1 capped-output notebook; measured against nteract Desktop and JupyterLab Desktop; download-size chart regenerated (`script/bench-download-size`, built in E2) and embedded in the README with the startup numbers. Further chart candidates for the same README section, added as the harness measures them: cold start (ms, defined stopwatch), idle memory RSS with one notebook open (the anti-Electron number), scroll frame time (p95 ms/frame); every chart carries its measurement date
 - [ ] Crash-safe autosave / sidecar recovery file
 - [ ] Settings: `~/.config/yoshi/settings.json` + `keymap.json` — defaults written on first run, a menu command opens them for manual editing (editor settings, keybinding overrides); no settings GUI in v0.1
 - [ ] Themes, persisted in settings.json: Gruvbox Dark Soft (default), Gruvbox Light, One Dark
