@@ -13,7 +13,18 @@ Status: pre-alpha (`0.1.0-alpha.N` releases; the E1 hello world, packaged).
 
 ## Install
 
-Download from [GitHub Releases](https://github.com/oxmonty/yoshi/releases). Artifacts are unsigned until v0.1 — signing, notarization, and Homebrew arrive then.
+<p>
+  <a href="https://github.com/oxmonty/yoshi/releases"><img alt="Download for macOS" src="https://img.shields.io/badge/Download_for_macOS-.app-2f6f4f?logo=apple&logoColor=white&style=for-the-badge"></a>
+  <a href="https://github.com/oxmonty/yoshi/releases"><img alt="Download for Linux" src="https://img.shields.io/badge/Download_for_Linux-AppImage-2f6f4f?logo=linux&logoColor=white&style=for-the-badge"></a>
+</p>
+
+Or install from the terminal (resolves the newest release, verifies checksums, and — on macOS — skips the Gatekeeper dance entirely, since curl downloads carry no quarantine flag):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/oxmonty/yoshi/main/install.sh | sh
+```
+
+Artifacts are unsigned until v0.1 — signing, notarization, and Homebrew arrive then.
 
 **macOS** (zipped `.app`): unzip, move `yoshi.app` wherever you like, then bypass Gatekeeper on first launch — right-click the app → Open → Open (or `xattr -dr com.apple.quarantine yoshi.app`). Needed once; unsigned apps can't be opened by double-click.
 
