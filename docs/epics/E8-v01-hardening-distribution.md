@@ -12,4 +12,5 @@ Spec: [Validation strategy](../../PRD.md#validation-strategy), [Distribution](..
 - [ ] Themes, persisted in settings.json: Gruvbox Dark Soft (default), Gruvbox Light, One Dark
 - [ ] macOS signing: Developer ID + notarytool + stapling + hardened-runtime entitlements (covers the bundled `uv` binary too); `.dmg` artifact
 - [ ] Homebrew cask in `oxmonty/homebrew-tap` (macOS-only; CLI exposed via the cask `binary` stanza) + release-please tag pipeline
-- [ ] Branding pass: real app icon (`.icns` + Linux icon), About panel, `.dmg` background — logo asset needed before this story
+- [ ] Branding pass: real app icon (`.icns` + Linux icon), About panel, `.dmg` background — logo asset needed before this story (halo-gradient reference committed in E2: `assets/icon/`)
+- [ ] `yoshi upgrade` (alias `update`): stable/next channels per the PRD's [Upgrade](../../PRD.md#distribution) design — GitHub Releases discovery, checksum-verified self-swap for AppImage/bare `.app`, `brew upgrade --cask` delegation on macOS
