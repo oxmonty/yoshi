@@ -7,7 +7,7 @@ Spec: [Distribution](../../PRD.md#distribution), [CI/CD](../../PRD.md#cicd)
 ## Stories
 
 - [ ] GitHub Actions matrix (macos-14, ubuntu-24.04): fmt, clippy, `cargo deny`, nextest
-- [ ] Tag → build → GitHub Release: zipped `.app` + AppImage + checksums, unsigned (Gatekeeper bypass documented in the README)
+- [ ] release-please → tag → build → GitHub Release: zipped `.app` + AppImage + checksums, unsigned (Gatekeeper bypass documented in the README); first release is `v0.1.0-alpha.1`
 - [ ] Minimal app identity: macOS bundle with Info.plist (bundle id `com.oxmonty.yoshi`, version from Cargo) + placeholder `.icns`; AppImage carries a `.desktop` file + icon
 - [ ] `yoshi --version` and `yoshi kernels list` work from a downloaded artifact (kernelspec-discovery smoke test)
-- [ ] Every later epic stays green on CI from here; tag per epic
+- [ ] Every later epic stays green on CI from here; one release-please PR merged per epic exit (`0.1.0-alpha.N` series until E8)
