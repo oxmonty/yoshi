@@ -6,7 +6,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", default-features = false, features = ["derive", "std", "help", "usage", "error-context"] }
 jupyter-protocol = "2"
 jupyter-zmq-client = { version = "1", features = ["async-dispatcher-runtime"] }
 serde_json = "1"

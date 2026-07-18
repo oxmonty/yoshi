@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use jupyter_protocol::JupyterKernelspec;
+use jupyter_zmq_client::KernelspecDir;
 
 #[derive(Parser)]
 #[command(
@@ -10,6 +11,9 @@ use jupyter_protocol::JupyterKernelspec;
     about = "A native, GPU-rendered Jupyter notebook app"
 )]
 struct Cli {
+    /// Notebook file to open
+    notebook: Option<PathBuf>,
+
     /// Run the kernel round-trip check without a window (used by CI)
     #[arg(long, hide = true)]
     headless: bool,
@@ -33,9 +37,8 @@ enum KernelsCommand {
     List,
 }
 
-/// What the yoshi binary should do for this invocation.
 pub enum Invocation {
-    Gui,
+    Gui(Option<PathBuf>),
     Headless,
     KernelsList,
 }
@@ -49,47 +52,53 @@ pub fn parse() -> Invocation {
         Some(Command::Kernels {
             command: KernelsCommand::List,
         }) => Invocation::KernelsList,
-        None => Invocation::Gui,
+        None => Invocation::Gui(cli.notebook),
     }
 }
 
-pub struct Kernelspec {
-    pub name: String,
-    pub path: PathBuf,
-    pub spec: JupyterKernelspec,
-}
-
-pub fn list_kernels() -> Vec<Kernelspec> {
-    list_kernels_in(&jupyter_zmq_client::dirs::data_dirs())
+pub fn list_kernels() -> Vec<KernelspecDir> {
+    // venv kernelspecs (sys.prefix installs) first, matching the app's python
+    // resolution; disk reads only — never shell out to jupyter (PRD, startup)
+    let mut dirs = Vec::new();
+    if let Ok(venv) = std::env::var("VIRTUAL_ENV") {
+        dirs.push(PathBuf::from(venv).join("share/jupyter"));
+    }
+    dirs.push(PathBuf::from(".venv/share/jupyter"));
+    dirs.extend(jupyter_zmq_client::dirs::data_dirs());
+    list_kernels_in(&dirs)
 }
 
 // jupyter-zmq-client's own listing is tokio-gated; this is the sync
 // equivalent over its data_dirs(). Jupyter semantics: earlier data dirs
 // shadow later ones for the same kernel name.
-fn list_kernels_in(data_dirs: &[PathBuf]) -> Vec<Kernelspec> {
-    let mut found: Vec<Kernelspec> = Vec::new();
+fn list_kernels_in(data_dirs: &[PathBuf]) -> Vec<KernelspecDir> {
+    let mut found: Vec<KernelspecDir> = Vec::new();
     for dir in data_dirs {
         let Ok(entries) = std::fs::read_dir(dir.join("kernels")) else {
             continue;
         };
         for entry in entries.flatten() {
-            let Some(name) = entry.file_name().to_str().map(String::from) else {
+            let Some(kernel_name) = entry.file_name().to_str().map(String::from) else {
                 continue;
             };
-            if found.iter().any(|k| k.name == name) {
+            if found.iter().any(|k| k.kernel_name == kernel_name) {
                 continue;
             }
             let path = entry.path();
             let Ok(bytes) = std::fs::read(path.join("kernel.json")) else {
                 continue;
             };
-            let Ok(spec) = serde_json::from_slice::<JupyterKernelspec>(&bytes) else {
+            let Ok(kernelspec) = serde_json::from_slice::<JupyterKernelspec>(&bytes) else {
                 continue;
             };
-            found.push(Kernelspec { name, path, spec });
+            found.push(KernelspecDir {
+                kernel_name,
+                path,
+                kernelspec,
+            });
         }
     }
-    found.sort_by(|a, b| a.name.cmp(&b.name));
+    found.sort_by(|a, b| a.kernel_name.cmp(&b.kernel_name));
     found
 }
 
@@ -102,14 +111,18 @@ pub fn print_kernels_list() {
         }
         return;
     }
-    let width = kernels.iter().map(|k| k.name.len()).max().unwrap_or(0);
+    let width = kernels
+        .iter()
+        .map(|k| k.kernel_name.len())
+        .max()
+        .unwrap_or(0);
     println!("Available kernels:");
     for k in kernels {
         println!(
             "  {:width$}  {}  ({})",
-            k.name,
+            k.kernel_name,
             k.path.display(),
-            k.spec.display_name
+            k.kernelspec.display_name
         );
     }
 }
@@ -143,10 +156,10 @@ mod tests {
         let kernels = list_kernels_in(&[first, second]);
 
         // then: names are sorted, and the first dir's python3 shadows the second's
-        let names: Vec<&str> = kernels.iter().map(|k| k.name.as_str()).collect();
+        let names: Vec<&str> = kernels.iter().map(|k| k.kernel_name.as_str()).collect();
         assert_eq!(names, ["extra", "python3"]);
-        let python3 = kernels.iter().find(|k| k.name == "python3").unwrap();
-        assert_eq!(python3.spec.display_name, "First Python");
+        let python3 = kernels.iter().find(|k| k.kernel_name == "python3").unwrap();
+        assert_eq!(python3.kernelspec.display_name, "First Python");
 
         std::fs::remove_dir_all(&root).ok();
     }

@@ -27,7 +27,8 @@ fn main() {
             }
         },
         yoshi_cli::Invocation::KernelsList => yoshi_cli::print_kernels_list(),
-        yoshi_cli::Invocation::Gui => run_gui(),
+        // notebook opening lands with the real document model (E6)
+        yoshi_cli::Invocation::Gui(_notebook) => run_gui(),
     }
 }
 
