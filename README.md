@@ -1,4 +1,7 @@
-# yoshi
+<h1>
+  <img alt="yoshi logo" src="./assets/icon/yoshi-256.png" width="70" valign="middle">
+  &nbsp;yoshi notebooks
+</h1>
 
 Yoshi is a native, GPU-rendered Jupyter notebook desktop app for macOS and Linux, built in Rust on GPUI — the wgpu-class UI framework behind Zed.
 

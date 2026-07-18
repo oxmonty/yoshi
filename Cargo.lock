@@ -6948,7 +6948,7 @@ checksum = "ec7a2a501ed189703dba8b08142f057e887dfc4b2cc4db2d343ac6376ba3e0b9"
 
 [[package]]
 name = "xtask"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 
 [[package]]
 name = "y4m"
@@ -6998,7 +6998,7 @@ dependencies = [
 
 [[package]]
 name = "yoshi-app"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "async-dispatcher",
@@ -7013,7 +7013,7 @@ dependencies = [
 
 [[package]]
 name = "yoshi-cli"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "clap",
  "jupyter-protocol",
@@ -7023,23 +7023,23 @@ dependencies = [
 
 [[package]]
 name = "yoshi-editor"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 
 [[package]]
 name = "yoshi-kernels"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 
 [[package]]
 name = "yoshi-notebook"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 
 [[package]]
 name = "yoshi-outputs"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 
 [[package]]
 name = "yoshi-ui-kit"
-version = "0.0.0"
+version = "0.1.0-alpha.1"
 
 [[package]]
 name = "zbus"

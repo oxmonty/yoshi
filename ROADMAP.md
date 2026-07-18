@@ -16,7 +16,7 @@ Usable as:
 
 ## Roadmap
 
-- [ ] **E1: Framework bake-off + hello world** — the repo exists on GitHub, the framework winner is recorded in the decision log, and `cargo run` opens a native window that executes `print("hello, yoshi")` against a real local ipykernel — after an explicit kernel-ready handshake — and displays the output, on both dev platforms, before any packaging exists. Honest sizing: ~2–3 weeks of evenings. → [stories](docs/epics/E1-framework-bake-off.md)
+- [x] **E1: Framework bake-off + hello world** — the repo exists on GitHub, the framework winner is recorded in the decision log, and `cargo run` opens a native window that executes `print("hello, yoshi")` against a real local ipykernel — after an explicit kernel-ready handshake — and displays the output, on both dev platforms, before any packaging exists. Honest sizing: ~2–3 weeks of evenings. → [stories](docs/epics/E1-framework-bake-off.md)
 
 - [ ] **E2: CI + unsigned artifacts (walking skeleton)** — the E1 hello world, unchanged, downloads from GitHub Releases and runs on a clean machine (zipped `.app` on macOS via right-click-Open, AppImage on Linux), with CI green on both platforms. Signed installers and Homebrew arrive with v0.1 (E8). → [stories](docs/epics/E2-ci-unsigned-artifacts.md)
 
