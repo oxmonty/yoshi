@@ -39,7 +39,7 @@ lint: ## Clippy with warnings denied (matches CI)
 	cargo clippy --workspace --all-targets -- -D warnings
 
 test: ## Run the test suite via nextest
-	cargo nextest run --workspace
+	cargo nextest run --workspace --no-tests=warn
 
 deny: ## Check dependency licenses against the allowlist
 	cargo deny check licenses
@@ -48,7 +48,7 @@ ci: ## Run every CI quality gate locally (fmt, clippy, deny, tests, headless)
 	cargo fmt --check
 	cargo clippy --workspace --all-targets -- -D warnings
 	cargo deny check licenses
-	cargo nextest run --workspace
+	cargo nextest run --workspace --no-tests=warn
 	cargo run -q -p yoshi-app -- --headless
 
 ## Git:

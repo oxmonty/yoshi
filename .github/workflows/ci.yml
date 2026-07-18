@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      # gpui links these at build time; wayland and fontconfig are dlopen'd at runtime
+      - name: Install Linux build deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev \
+            libfreetype6-dev libfontconfig-dev libx11-xcb-dev libxcb1-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny,cargo-nextest
+
+      - run: cargo fmt --check
+
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - run: cargo deny check licenses
+
+      - run: cargo nextest run --workspace --no-tests=warn
+
+      - name: Headless kernel round-trip
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet ipykernel
+          cargo run -q -p yoshi-app -- --headless
