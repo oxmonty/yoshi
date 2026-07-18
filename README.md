@@ -22,16 +22,9 @@ Recommended — the installer resolves the newest release, verifies checksums, a
 curl -fsSL https://raw.githubusercontent.com/oxmonty/yoshi/main/install.sh | sh
 ```
 
-<!-- direct links pin the current tag while releases are prereleases; bump the
-     tag each release, and switch to /releases/latest/download/ at v0.1.0 -->
-Or grab a binary directly:
+Or download from [GitHub Releases](https://github.com/oxmonty/yoshi/releases) (binaries + checksums per platform).
 
-- [macOS · Apple silicon (`.app` zip)](https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-macos-arm64.zip)
-- [macOS · Intel (`.app` zip)](https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-macos-x86_64.zip)
-- [Linux · x86_64 (AppImage)](https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-linux-x86_64.AppImage)
-- [all releases + checksums](https://github.com/oxmonty/yoshi/releases)
-
-Artifacts are unsigned until v0.1 — signing, notarization, and Homebrew arrive then.
+Artifacts are unsigned until v0.1 — signing, notarization, Homebrew, and one-click download links arrive then.
 
 **macOS** (zipped `.app`): browser downloads are quarantined, and modern macOS shows unsigned quarantined apps as *"yoshi.app is damaged and can't be opened"* — that's Gatekeeper talking, not a corrupt download, and right-click → Open no longer bypasses it. Clear it once after unzipping:
 
