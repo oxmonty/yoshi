@@ -15,7 +15,7 @@ Status: pre-alpha (`0.1.0-alpha.N` releases; the E1 hello world, packaged).
 
 <p>
   <a href="https://github.com/oxmonty/yoshi/releases"><img alt="Download for macOS" src="./assets/badges/download-macos.svg" width="210"></a>
-  <a href="https://github.com/oxmonty/yoshi/releases"><img alt="Download for Linux" src="./assets/badges/download-linux.svg" width="210"></a>
+  <a href="https://github.com/oxmonty/yoshi/releases"><img alt="Download for Linux" src="./assets/badges/download-linux.svg?v=2" width="210"></a>
 </p>
 
 Or install from the terminal (resolves the newest release, verifies checksums, and — on macOS — skips the Gatekeeper dance entirely, since curl downloads carry no quarantine flag):
