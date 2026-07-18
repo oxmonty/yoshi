@@ -1,6 +1,6 @@
 # E2: CI + unsigned artifacts (walking skeleton)
 
-The E1 hello world, unchanged, downloads from GitHub Releases and runs on a clean machine (zipped `.app` on macOS via right-click-Open, AppImage on Linux), with CI green on both platforms. Signed installers and Homebrew arrive with v0.1 (E8).
+The E1 hello world, unchanged, downloads from GitHub Releases and runs on a clean machine (zipped `.app` on macOS after the documented quarantine strip — or quarantine-free via the curl installer — AppImage on Linux), with CI green on both platforms. Signed installers and Homebrew arrive with v0.1 (E8).
 
 Spec: [Distribution](../../PRD.md#distribution), [CI/CD](../../PRD.md#cicd)
 

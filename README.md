@@ -16,24 +16,30 @@ Status: pre-alpha (`0.1.0-alpha.N` releases; the E1 hello world, packaged).
 
 ## Install
 
+Recommended — the installer resolves the newest release, verifies checksums, and (on macOS) skips Gatekeeper quarantine entirely, since curl downloads carry no quarantine flag:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/oxmonty/yoshi/main/install.sh | sh
+```
+
 <!-- direct links pin the current tag while releases are prereleases; bump the
      tag each release, and switch to /releases/latest/download/ at v0.1.0 -->
-Latest binaries per platform:
+Or grab a binary directly:
 
 - [macOS · Apple silicon (`.app` zip)](https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-macos-arm64.zip)
 - [macOS · Intel (`.app` zip)](https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-macos-x86_64.zip)
 - [Linux · x86_64 (AppImage)](https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-linux-x86_64.AppImage)
 - [all releases + checksums](https://github.com/oxmonty/yoshi/releases)
 
-Or install from the terminal (resolves the newest release, verifies checksums, and — on macOS — skips the Gatekeeper dance entirely, since curl downloads carry no quarantine flag):
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/oxmonty/yoshi/main/install.sh | sh
-```
-
 Artifacts are unsigned until v0.1 — signing, notarization, and Homebrew arrive then.
 
-**macOS** (zipped `.app`): unzip, move `yoshi.app` wherever you like, then bypass Gatekeeper on first launch — right-click the app → Open → Open (or `xattr -dr com.apple.quarantine yoshi.app`). Needed once; unsigned apps can't be opened by double-click.
+**macOS** (zipped `.app`): browser downloads are quarantined, and modern macOS shows unsigned quarantined apps as *"yoshi.app is damaged and can't be opened"* — that's Gatekeeper talking, not a corrupt download, and right-click → Open no longer bypasses it. Clear it once after unzipping:
+
+```sh
+xattr -dr com.apple.quarantine yoshi.app
+```
+
+(or use the curl installer above and skip all of this). Signing at v0.1 removes the dance entirely.
 
 **Linux** (AppImage): `chmod +x yoshi-*.AppImage && ./yoshi-*.AppImage`. Needs FUSE 2 (`libfuse2` on Debian/Ubuntu); without it, run with `--appimage-extract-and-run`.
 
