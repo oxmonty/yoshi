@@ -18,16 +18,17 @@ const HELLO_CODE: &str = "print(\"hello, yoshi\")";
 actions!(yoshi, [RunCell]);
 
 fn main() {
-    if std::env::args().any(|a| a == "--headless") {
-        match run_headless() {
+    match yoshi_cli::parse() {
+        yoshi_cli::Invocation::Headless => match run_headless() {
             Ok(()) => std::process::exit(0),
             Err(e) => {
                 eprintln!("headless kernel round-trip failed: {e:#}");
                 std::process::exit(2);
             }
-        }
+        },
+        yoshi_cli::Invocation::KernelsList => yoshi_cli::print_kernels_list(),
+        yoshi_cli::Invocation::Gui => run_gui(),
     }
-    run_gui();
 }
 
 fn run_headless() -> anyhow::Result<()> {

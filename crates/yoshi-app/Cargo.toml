@@ -18,3 +18,4 @@ jupyter-protocol = "2"
 jupyter-zmq-client = { version = "1", features = ["async-dispatcher-runtime"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4"] }
+yoshi-cli = { path = "../yoshi-cli" }
