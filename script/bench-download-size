@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""Render the download-size comparison chart for the README.
+
+Fetches macOS arm64 download sizes live (GitHub release APIs + the VS Code
+CDN), then draws light/dark bar charts into assets/benchmarks/. Needs
+matplotlib (dev-only): .venv/bin/pip install matplotlib
+"""
+
+import json
+import urllib.request
+from pathlib import Path
+
+OUT_DIR = Path(__file__).resolve().parent.parent / "assets" / "benchmarks"
+
+ACCENT = {"light": "#2f6f4f", "dark": "#3a8a62"}
+NEUTRAL = {"light": "#8f959d", "dark": "#6e747d"}
+SURFACE = {"light": "#ffffff", "dark": "#0d1117"}
+INK = {"light": "#24292f", "dark": "#e6edf3"}
+MUTED_INK = {"light": "#57606a", "dark": "#8b949e"}
+GRID = {"light": "#d0d7de", "dark": "#30363d"}
+
+
+def http(url, head=False):
+    req = urllib.request.Request(
+        url, method="HEAD" if head else "GET", headers={"User-Agent": "yoshi-bench"}
+    )
+    return urllib.request.urlopen(req, timeout=30)
+
+
+def gh_asset_mb(repo, name_contains):
+    with http(f"https://api.github.com/repos/{repo}/releases?per_page=1") as r:
+        release = json.load(r)[0]
+    for asset in release["assets"]:
+        if all(part in asset["name"] for part in name_contains):
+            return asset["size"] / 1048576, release["tag_name"]
+    raise SystemExit(f"{repo}: no asset matching {name_contains}")
+
+
+def vscode_mb():
+    with http(
+        "https://update.code.visualstudio.com/latest/darwin-arm64/stable", head=True
+    ) as r:
+        return int(r.headers["Content-Length"]) / 1048576
+
+
+def fetch_sizes():
+    yoshi, yoshi_tag = gh_asset_mb("oxmonty/yoshi", ["macos-arm64.zip"])
+    nteract, _ = gh_asset_mb("nteract/desktop", ["darwin-arm64.dmg"])
+    zed, _ = gh_asset_mb("zed-industries/zed", ["Zed-aarch64.dmg"])
+    jld, _ = gh_asset_mb("jupyterlab/jupyterlab-desktop", ["macOS-arm64.dmg"])
+    return yoshi_tag, [
+        (f"yoshi {yoshi_tag.lstrip('v')}", yoshi, True),
+        ("nteract Desktop", nteract, False),
+        ("Zed", zed, False),
+        ("VS Code", vscode_mb(), False),
+        ("JupyterLab Desktop", jld, False),
+    ]
+
+
+def draw(rows, mode, out):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rows = sorted(rows, key=lambda r: r[1])
+    labels = [r[0] for r in rows]
+    values = [r[1] for r in rows]
+    colors = [ACCENT[mode] if r[2] else NEUTRAL[mode] for r in rows]
+
+    fig, ax = plt.subplots(figsize=(8, 3.2), dpi=200)
+    fig.patch.set_facecolor(SURFACE[mode])
+    ax.set_facecolor(SURFACE[mode])
+
+    y = range(len(rows))
+    ax.barh(y, values, height=0.55, color=colors, zorder=3)
+    for i, v in enumerate(values):
+        ax.text(
+            v + max(values) * 0.015,
+            i,
+            f"{v:.1f} MB" if v < 10 else f"{v:.0f} MB",
+            va="center",
+            fontsize=10,
+            color=INK[mode],
+            zorder=4,
+        )
+
+    ax.set_yticks(list(y), labels)
+    ax.tick_params(colors=MUTED_INK[mode], labelsize=10, length=0)
+    for tick, row in zip(ax.get_yticklabels(), rows):
+        tick.set_color(INK[mode])
+        if row[2]:
+            tick.set_fontweight("bold")
+    ax.set_xlim(0, max(values) * 1.14)
+    ax.xaxis.grid(True, color=GRID[mode], linewidth=0.6, zorder=0)
+    ax.set_axisbelow(True)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_xlabel("macOS arm64 download, MB", fontsize=10, color=MUTED_INK[mode])
+    ax.invert_yaxis()
+
+    fig.tight_layout()
+    fig.savefig(out, facecolor=SURFACE[mode])
+    print(out)
+
+
+def main():
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    tag, rows = fetch_sizes()
+    for mode in ("light", "dark"):
+        draw(rows, mode, OUT_DIR / f"download-size-{mode}.png")
+
+
+if __name__ == "__main__":
+    main()
