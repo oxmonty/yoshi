@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# gpui links these at build time; wayland and fontconfig are dlopen'd at runtime.
+# Shared by ci.yml and release.yml so the list can't drift between them.
+set -euo pipefail
+sudo apt-get update
+sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev \
+    libfreetype6-dev libfontconfig-dev libx11-xcb-dev libxcb1-dev

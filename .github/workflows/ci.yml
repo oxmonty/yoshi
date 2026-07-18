@@ -20,13 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # gpui links these at build time; wayland and fontconfig are dlopen'd at runtime
       - name: Install Linux build deps
         if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev \
-            libfreetype6-dev libfontconfig-dev libx11-xcb-dev libxcb1-dev
+        run: script/install-linux-build-deps
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -38,16 +34,16 @@ jobs:
         with:
           tool: cargo-deny,cargo-nextest
 
-      - run: cargo fmt --check
+      - run: make fmt-check
 
-      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: make lint
 
-      - run: cargo deny check licenses
+      - run: make deny
 
-      - run: cargo nextest run --workspace --no-tests=warn
+      - run: make test
 
       - name: Headless kernel round-trip
         run: |
           python3 -m venv .venv
           .venv/bin/pip install --quiet ipykernel
-          cargo run -q -p yoshi-app -- --headless
+          make headless

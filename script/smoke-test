@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Smoke-test a packaged yoshi: --version works and kernelspec discovery finds
+# a freshly registered kernel. Usage: script/smoke-test <yoshi-binary> [args...]
+set -euo pipefail
+
+venv="$(mktemp -d)/venv"
+python3 -m venv "$venv"
+"$venv/bin/pip" install --quiet ipykernel
+"$venv/bin/python" -m ipykernel install --user --name smoke
+
+"$@" --version
+"$@" kernels list | tee /dev/stderr | grep -q smoke
+echo "smoke OK"

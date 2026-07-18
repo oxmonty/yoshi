@@ -1,4 +1,4 @@
-.PHONY: help bootstrap run headless build release fmt lint test deny ci gacp
+.PHONY: help bootstrap run headless build release fmt fmt-check lint test deny ci gacp
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -35,6 +35,9 @@ release: ## Optimized release build
 fmt: ## Format all Rust code
 	cargo fmt
 
+fmt-check: ## Check formatting without modifying (matches CI)
+	cargo fmt --check
+
 lint: ## Clippy with warnings denied (matches CI)
 	cargo clippy --workspace --all-targets -- -D warnings
 
@@ -44,12 +47,7 @@ test: ## Run the test suite via nextest
 deny: ## Check dependency licenses against the allowlist
 	cargo deny check licenses
 
-ci: ## Run every CI quality gate locally (fmt, clippy, deny, tests, headless)
-	cargo fmt --check
-	cargo clippy --workspace --all-targets -- -D warnings
-	cargo deny check licenses
-	cargo nextest run --workspace --no-tests=warn
-	cargo run -q -p yoshi-app -- --headless
+ci: fmt-check lint deny test headless ## Run every CI quality gate locally
 
 ## Git:
 gacp: ## Git add, commit, push (Usage: make gacp M="type(scope): message")
