@@ -5,7 +5,7 @@ allow = [
     "BSD-2-Clause",
     "BSD-3-Clause",
     "MPL-2.0",
-    "AGPL-3.0",
+    "AGPL-3.0-only",
     "ISC",
     "Unicode-3.0",
     "Zlib",
@@ -15,4 +15,5 @@ allow = [
     "0BSD",                           # proc-macro helper, compile-time only
     "BSL-1.0",                        # clipboard-win, Windows-only cfg
     "Apache-2.0 WITH LLVM-exception", # ar_archive_writer (via psm/stacker build dep)
+    "Unlicense",                      # win_uds (via zeromq), Windows-only cfg, public-domain dedication
 ]
