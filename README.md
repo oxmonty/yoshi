@@ -18,11 +18,6 @@ Status: pre-alpha (`0.1.0-alpha.N` releases; the E1 hello world, packaged).
 
 <!-- direct links pin the current tag while releases are prereleases; bump the
      tag each release, and switch to /releases/latest/download/ at v0.1.0 -->
-<p>
-  <a href="https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-macos-arm64.zip"><img alt="Download for macOS" src="./assets/badges/download-macos.svg" width="210"></a>
-  <a href="https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-linux-x86_64.AppImage"><img alt="Download for Linux" src="./assets/badges/download-linux.svg?v=3" width="210"></a>
-</p>
-
 Latest binaries per platform:
 
 - [macOS · Apple silicon (`.app` zip)](https://github.com/oxmonty/yoshi/releases/download/v0.1.0-alpha.1/yoshi-macos-arm64.zip)
