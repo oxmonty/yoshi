@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Assemble an unsigned yoshi AppImage into dist/.
+# Requires appimagetool on PATH (or set APPIMAGETOOL to its path).
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+version=$(cargo metadata --no-deps --format-version 1 |
+    python3 -c 'import json,sys; print(next(p for p in json.load(sys.stdin)["packages"] if p["name"] == "yoshi-app")["version"])')
+
+cargo build --release -p yoshi-app
+
+appdir="dist/yoshi.AppDir"
+rm -rf "$appdir"
+mkdir -p "$appdir/usr/bin"
+cp target/release/yoshi "$appdir/usr/bin/yoshi"
+cp assets/linux/yoshi.desktop "$appdir/yoshi.desktop"
+cp assets/icon/yoshi-256.png "$appdir/yoshi.png"
+ln -sf usr/bin/yoshi "$appdir/AppRun"
+
+arch="$(uname -m)"
+out="dist/yoshi-$version-linux-$arch.AppImage"
+rm -f "$out"
+ARCH="$arch" "${APPIMAGETOOL:-appimagetool}" "$appdir" "$out"
+echo "$out"

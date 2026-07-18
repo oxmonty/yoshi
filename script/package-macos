@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Assemble an unsigned yoshi.app and zip it into dist/.
+# Usage: script/package-macos [rust-target-triple]   (e.g. x86_64-apple-darwin)
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+target="${1:-}"
+version=$(cargo metadata --no-deps --format-version 1 |
+    python3 -c 'import json,sys; print(next(p for p in json.load(sys.stdin)["packages"] if p["name"] == "yoshi-app")["version"])')
+
+if [ -n "$target" ]; then
+    rustup target add "$target"
+    cargo build --release -p yoshi-app --target "$target"
+    bin="target/$target/release/yoshi"
+    arch="${target%%-*}"
+else
+    cargo build --release -p yoshi-app
+    bin="target/release/yoshi"
+    arch="$(uname -m)"
+fi
+
+app="dist/yoshi.app"
+rm -rf "$app"
+mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+cp "$bin" "$app/Contents/MacOS/yoshi"
+cp assets/icon/yoshi.icns "$app/Contents/Resources/yoshi.icns"
+sed "s/@VERSION@/$version/g" assets/macos/Info.plist > "$app/Contents/Info.plist"
+
+zipname="yoshi-$version-macos-$arch.zip"
+(cd dist && rm -f "$zipname" && zip -qry "$zipname" yoshi.app)
+echo "dist/$zipname"

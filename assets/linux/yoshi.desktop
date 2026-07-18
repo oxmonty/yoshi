@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=yoshi
+Comment=A native, GPU-rendered Jupyter notebook app
+Exec=yoshi %f
+Icon=yoshi
+Type=Application
+Terminal=false
+Categories=Development;Science;
+MimeType=application/x-ipynb+json;

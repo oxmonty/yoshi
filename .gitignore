@@ -1,3 +1,4 @@
 /target
+/dist
 .venv
 .DS_Store
