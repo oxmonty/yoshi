@@ -197,7 +197,7 @@ macOS: signed + notarized `.dmg` via GitHub Releases + Homebrew **cask** in `oxm
 
 **Quality gates (every PR, from E2):** `cargo fmt --check`, `clippy -D warnings`, `cargo deny check licenses`, nextest unit suite, golden round-trip suite, headless kernel integration test (CI installs python3 + ipykernel). Required: all. The license check and golden round-trip are the two that protect the project's core promises.
 
-**Versioning:** semver via release-please (active from E2), conventional commits. Pre-MVP releases are a `0.1.0-alpha.N` prerelease series, one release-please PR merged per epic exit, until E8 cuts `v0.1.0`. Breaking = anything that changes on-disk notebook output or settings schema.
+**Versioning:** semver via release-please (active from E2), conventional commits. Pre-MVP releases are a `0.1.0-alpha.N` prerelease series, one release-please PR merged per epic exit, until E8 cuts `v0.1.0`. Breaking = anything that changes on-disk notebook output or settings schema. Known ceiling: release-please bumps `Cargo.toml` via a generic annotation, so `Cargo.lock`'s workspace-member versions lag one release behind until the next ordinary commit refreshes them — harmless while nothing builds `--locked`; switch to the `rust` release-type/cargo-workspace plugin if that ever changes.
 
 ```
 merge to main ──▶ release-please PR ──▶ tag vX.Y.Z

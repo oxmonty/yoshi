@@ -1,0 +1,94 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+      tag_name: ${{ steps.rp.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: rp
+
+  # Build jobs live in this workflow because tags created with GITHUB_TOKEN
+  # do not trigger other workflows.
+  macos-artifacts:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Package .app (arm64 + x86_64)
+        run: |
+          script/package-macos
+          script/package-macos x86_64-apple-darwin
+
+      - name: Smoke test from the artifact
+        run: |
+          mkdir /tmp/smoke && cd /tmp/smoke
+          unzip -q "$GITHUB_WORKSPACE"/dist/yoshi-*-macos-arm64.zip
+          "$GITHUB_WORKSPACE"/script/smoke-test ./yoshi.app/Contents/MacOS/yoshi
+
+      - name: Upload artifacts to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist
+          shasum -a 256 yoshi-*.zip > SHA256SUMS-macos.txt
+          gh release upload "${{ needs.release-please.outputs.tag_name }}" yoshi-*.zip SHA256SUMS-macos.txt
+
+  linux-artifacts:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - name: Install Linux build deps
+        run: script/install-linux-build-deps
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install appimagetool
+        run: |
+          curl -fsSLo /tmp/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool
+
+      - name: Package AppImage
+        env:
+          APPIMAGETOOL: /tmp/appimagetool
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: script/package-linux
+
+      - name: Smoke test from the artifact
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: script/smoke-test ./dist/yoshi-*.AppImage
+
+      - name: Upload artifacts to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist
+          sha256sum yoshi-*.AppImage > SHA256SUMS-linux.txt
+          gh release upload "${{ needs.release-please.outputs.tag_name }}" yoshi-*.AppImage SHA256SUMS-linux.txt
