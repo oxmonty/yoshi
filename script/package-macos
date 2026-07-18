@@ -24,7 +24,10 @@ rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$bin" "$app/Contents/MacOS/yoshi"
 cp assets/icon/yoshi.icns "$app/Contents/Resources/yoshi.icns"
-sed "s/@VERSION@/$version/g" assets/macos/Info.plist > "$app/Contents/Info.plist"
+# CFBundleVersion must be dot-separated integers; strip any -alpha.N suffix
+bundle_version="${version%%-*}"
+sed -e "s/@VERSION@/$version/g" -e "s/@BUNDLE_VERSION@/$bundle_version/g" \
+    assets/macos/Info.plist > "$app/Contents/Info.plist"
 
 zipname="yoshi-$version-macos-$arch.zip"
 (cd dist && rm -f "$zipname" && zip -qry "$zipname" yoshi.app)
