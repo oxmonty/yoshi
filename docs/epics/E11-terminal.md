@@ -10,3 +10,4 @@ Spec: [Terminal](../../PRD.md#terminal)
 - [ ] Terminal pane type in the E10 grid: shell spawned in the workspace directory, drag-swap with notebook panes
 - [ ] Keyboard/IME passthrough, scrollback, selection + copy/paste, ANSI colors from the active theme
 - [ ] Warp UX pass: catalogue the interaction details worth porting by hand (drag-swap affordances, block-style polish — warpui's MIT components are fair styling references; no code extraction)
+- [ ] Bundle `yoshi-notebook-skills.md`: an agent skills file shipped with the app (and repo) teaching terminal agents (Claude Code, Codex, Kimi) how to work with the open notebook from the terminal pane — file locations, `.ipynb` round-trip rules, kernel interaction, what not to touch; installable into the agent's skills dir or referenced via CLAUDE.md/AGENTS.md
