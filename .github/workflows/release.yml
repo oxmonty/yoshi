@@ -50,6 +50,8 @@ jobs:
         run: |
           cd dist
           shasum -a 256 yoshi-*.zip > SHA256SUMS-macos.txt
+          # stable-named aliases give the README evergreen-ish one-click links
+          for arch in arm64 x86_64; do cp yoshi-*-macos-$arch.zip yoshi-macos-$arch.zip; done
           gh release upload "${{ needs.release-please.outputs.tag_name }}" yoshi-*.zip SHA256SUMS-macos.txt
 
   linux-artifacts:
@@ -91,4 +93,5 @@ jobs:
         run: |
           cd dist
           sha256sum yoshi-*.AppImage > SHA256SUMS-linux.txt
+          cp yoshi-*-linux-x86_64.AppImage yoshi-linux-x86_64.AppImage
           gh release upload "${{ needs.release-please.outputs.tag_name }}" yoshi-*.AppImage SHA256SUMS-linux.txt
