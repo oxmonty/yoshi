@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.0-alpha.2](https://github.com/oxmonty/yoshi/compare/v0.1.0-alpha.1...v0.1.0-alpha.2) (2026-07-20)
+
+
+### Features
+
+* add curl installer and README download buttons ([a66149f](https://github.com/oxmonty/yoshi/commit/a66149f9722adb30bb66ab98a01d3ea385b8b570))
+* add download-size benchmark chart script ([e0f0bde](https://github.com/oxmonty/yoshi/commit/e0f0bded46c7efd486417822ecdf89797aaa4fd5))
+* stamp measurement date on benchmark charts and note future metrics ([4316803](https://github.com/oxmonty/yoshi/commit/4316803de40b659f9f4193c24db0e27c2f13782b))
+
+
+### Bug Fixes
+
+* **build:** adopt provided halo icon artwork for all icon assets ([3f4a13d](https://github.com/oxmonty/yoshi/commit/3f4a13d13501f86b6adc912e8d5c1822e7f8faa7))
+* **build:** inset app icon to Apple icon-grid margins ([5d9be18](https://github.com/oxmonty/yoshi/commit/5d9be1838bce026cefda3488b7bbb6bd5f04a37e))
+* **build:** update halo icon artwork ([316d0e4](https://github.com/oxmonty/yoshi/commit/316d0e432e10a8abe601f81e6204a4650b254cb6))
+* **build:** update halo icon artwork ([6eb68d0](https://github.com/oxmonty/yoshi/commit/6eb68d0ff831ec07f1201d554f7431cbaf0b7657))
+* **build:** update halo icon artwork ([67b992e](https://github.com/oxmonty/yoshi/commit/67b992e0d13783ecaa9225260fe076b03a2a8a72))
+* **build:** update halo icon artwork ([080d4e3](https://github.com/oxmonty/yoshi/commit/080d4e3ba552c0e51aa978354162d48dadbdd770))
+
 ## 0.1.0-alpha.1 (2026-07-18)
 
 
