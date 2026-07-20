@@ -16,3 +16,4 @@ Spec: [Validation strategy](../../PRD.md#validation-strategy), [Distribution](..
 - [ ] Branding pass: real app icon (`.icns` + Linux icon), About panel, `.dmg` background — logo asset needed before this story (halo-gradient reference committed in E2: `assets/icon/`)
 - [ ] `yoshi upgrade` (alias `update`): stable/next channels per the PRD's [Upgrade](../../PRD.md#distribution) design — GitHub Releases discovery, checksum-verified self-swap for AppImage/bare `.app`, `brew upgrade --cask` delegation on macOS
 - [ ] Download metrics, VLC's model: count server-side from the GitHub Releases API (`assets[].download_count`) plus Homebrew analytics — no in-app phone-home, so no disclaimer or opt-out needed; an opt-in update-ping is considered only if `yoshi upgrade` ever grows an automatic check
+- [ ] Set up the community Discord server (announcements, help, dev channels) with the invite link in the README and the v0.1 release notes
